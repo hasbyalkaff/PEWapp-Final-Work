@@ -1,13 +1,17 @@
 package final_work.hasby.pewapp;
 
+import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.util.Log;
 import android.view.SurfaceView;
+import android.widget.ImageView;
 
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
+import org.opencv.android.Utils;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
 import org.opencv.core.MatOfRect;
@@ -29,12 +33,19 @@ public class CameraHandler implements CameraBridgeViewBase.CvCameraViewListener2
     private String TAG = "Camera Handler Class";
     private Context context;
 
+    private ImageView mImageView;
     private CameraBridgeViewBase mCameraView;
     private CascadeClassifier mDetection;
 
     private Mat grayscaleImage;
     private int absoluteFaceSize;
+    private FaceRegion mFaceRegion;
 
+    private Requester mRequester;
+
+    public void setImageView(int imageView){
+        this.mImageView = ((Activity)context).findViewById(imageView);
+    }
     public void setCamera(CameraBridgeViewBase mCamera){
         mCamera.setVisibility(SurfaceView.VISIBLE);
         mCamera.setCvCameraViewListener(this);
@@ -47,6 +58,7 @@ public class CameraHandler implements CameraBridgeViewBase.CvCameraViewListener2
 
     public CameraHandler(Context context){
         this.context = context;
+        this.mRequester = new Requester(context);
     }
 
     private BaseLoaderCallback mLoaderCallback = new BaseLoaderCallback(context) {
@@ -125,6 +137,17 @@ public class CameraHandler implements CameraBridgeViewBase.CvCameraViewListener2
             Log.i(TAG, "face was found");
             for (int i = 0; i < facesArray.length; i++) {
                 Imgproc.rectangle(grayscaleImage, facesArray[i].tl(), facesArray[i].br(), new Scalar(0, 255, 255), 3);
+                Rect rectCropFace = new Rect(facesArray[i].tl(), facesArray[i].br());
+                Mat faceImage = new Mat(grayscaleImage, rectCropFace);
+
+                mFaceRegion = new FaceRegion(faceImage);
+                mRequester.jsonPOST(mFaceRegion.get_bitmap_face());
+                mImageView.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        mImageView.setImageBitmap(mFaceRegion.get_bitmap_face());
+                    }
+                });
             }
         }
         else {

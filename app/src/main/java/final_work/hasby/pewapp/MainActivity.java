@@ -4,12 +4,14 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.WindowManager;
+import android.widget.ImageView;
 
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.LoaderCallbackInterface;
 
 public class MainActivity extends AppCompatActivity {
     private String TAG = "Main Activity Class";
+    private ImageView imageView;
     private CameraHandler cameraHandler;
     private CameraBridgeViewBase cameraView;
 
@@ -21,9 +23,11 @@ public class MainActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_main);
         cameraView = (CameraBridgeViewBase)findViewById(R.id.camera_view);
+        imageView = (ImageView)findViewById(R.id.imageView);
 
         cameraHandler = new CameraHandler(this);
         cameraHandler.setCamera(cameraView);
+        cameraHandler.setImageView(R.id.imageView);
     }
 
     @Override
